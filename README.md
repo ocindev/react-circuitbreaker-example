@@ -1,30 +1,21 @@
-# React + TypeScript + Vite
+# React Circuitbreaker Example
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+## Install dependencies
+`npm install`
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Start dev server
+`npm run dev`
 
-- Configure the top-level `parserOptions` property like this:
+## Install mock server dependencies
+`cd mock-server & npm install`
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+## Start mock server
+`npm run mock`
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+## The circuitbreaker
+
+The `App.tsx` runs the async api call in a `setInterval` that is triggered every 5 seconds. It will fetch the `/api` route of the mock-server that will respond with a `503 Service unavailable` error. After 3 failed requests the circuitbreaker for the `test-api.ts` will open and for 10 seconds every subsequent api call will be skipped. As long as the circuitbreaker is in `CircuitState.Open`, any new api call will produce a CircuitBreakerError. After the timeout of 10 seconds the first new request will be executed again. If it suceeds, the circuitbreaker switches to the `CircuitState.Closed` and the fetching will resume. Otherwise the circuitbreaker will stay in `CircuitState.Open` and wait again 10 seconds to try again.
